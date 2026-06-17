@@ -35,9 +35,10 @@ def extract_calls(messages: list[dict]) -> list[ToolCall]:
 
     The parsed xLAM dataset uses the OpenAI shape:
     ``assistant.tool_calls[i] = {"function": {"name": str, "arguments": <json
-    string>}, "type": "function"}``. ``arguments`` is a JSON *string* there, so
-    it is parsed into a dict. An assistant turn with no tool_calls yields ``[]``
-    (the irrelevance case).
+    string>}, "type": "function"}``. ``arguments`` is always a JSON *string*
+    (verified across all 60k rows in Group 2 / docs/iteration_2.md), so it is
+    parsed into a dict. An assistant turn with no tool_calls yields ``[]`` (the
+    irrelevance case).
     """
     calls: list[ToolCall] = []
     for msg in messages:
@@ -45,10 +46,7 @@ def extract_calls(messages: list[dict]) -> list[ToolCall]:
             continue
         for tc in msg.get("tool_calls") or []:
             fn = tc["function"]
-            args = fn["arguments"]
-            if isinstance(args, str):
-                args = json.loads(args)
-            calls.append(ToolCall(name=fn["name"], arguments=args))
+            calls.append(ToolCall(name=fn["name"], arguments=json.loads(fn["arguments"])))
     return calls
 
 
