@@ -51,8 +51,18 @@ def extract_calls(messages: list[dict]) -> list[ToolCall]:
 
 
 def serialize_calls(calls: list[ToolCall]) -> str:
-    """Render the assistant training target: the SalesforceLlama JSON array."""
-    return json.dumps([{"name": c.name, "arguments": c.arguments} for c in calls])
+    """Render the assistant training target: the SalesforceLlama JSON array.
+
+    ``ensure_ascii=False`` (Group 3 finalize, item #2): the model generates this
+    turn (the handler never re-renders it for the single-turn AST categories), so
+    raw UTF-8 is more natural and token-efficient and still round-trips through
+    the handler's ``json.loads``. Key order (name, arguments) and default
+    separators match ``SalesforceLlamaHandler``.
+    """
+    return json.dumps(
+        [{"name": c.name, "arguments": c.arguments} for c in calls],
+        ensure_ascii=False,
+    )
 
 
 def decode_ast(text: str) -> list[dict]:
