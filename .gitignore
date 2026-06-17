@@ -1,4 +1,24 @@
 .claude/
 .DS_Store
+
+# Python env
 .venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Secrets
+.env
+
+# Large / generated artifacts (not version controlled)
+data/
+artifacts/
+third_party/
+
+# MLflow local store
+mlruns/
+
 implementation_plan.md
+docs/

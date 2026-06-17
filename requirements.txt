@@ -1,0 +1,10 @@
+datasets==5.0.0
+transformers==5.12.1
+huggingface-hub==1.19.0
+openai==2.42.0
+pandas==2.3.3
+matplotlib==3.11.0
+mlflow==3.14.0
+python-dotenv==1.2.2
+pytest==9.1.0
+ruff==0.15.17
