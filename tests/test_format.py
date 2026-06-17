@@ -135,3 +135,47 @@ def test_format_irrelevance_row_empty_completion():
     assert "Who won the 2019 NCAA Final Four?" in ex["prompt"]
     assert "raceresult" in ex["prompt"]
     assert '"type": "dict"' in ex["prompt"]  # tool normalized to nested form
+
+
+def test_normalize_openai_function_always_emits_properties_and_required():
+    # No-arg function: BFCL always renders both keys, so we must too.
+    fn = {"name": "g", "parameters": {"type": "object"}}
+    out = fmt.normalize_openai_function(fn)
+    assert out["parameters"]["type"] == "dict"
+    assert out["parameters"]["properties"] == {}
+    assert out["parameters"]["required"] == []
+
+
+# Byte-exact snapshot of the prompt contract (the fragile train/eval surface).
+# Guards OUR build_prompt from silent drift; the bfcl-eval pin (Phase 3) guards
+# the handler's side. If this fails, build_prompt changed — re-verify vs the
+# pinned SalesforceLlamaHandler before updating.
+EXPECTED_PROMPT = (
+    "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
+    "You are a helpful assistant that can use tools. You are developed by Salesforce xLAM team.\n"
+    "You have access to a set of tools. When using tools, make calls in a single JSON array: \n\n"
+    '[{"name": "tool_call_name", "arguments": {"arg1": "value1", "arg2": "value2"}}, '
+    "... (additional parallel tool calls as needed)]\n\n"
+    "If no tool is suitable, state that explicitly. If the user's input lacks required "
+    "parameters, ask for clarification. Do not interpret or respond until tool results are "
+    "returned. Once they are available, process them or make additional calls if needed. "
+    "For tasks that don't require tools, such as casual conversation or general advice, "
+    "respond directly in plain text. The available tools are:\n\n"
+    "{\n"
+    '    "name": "f",\n'
+    '    "description": "",\n'
+    '    "parameters": {\n'
+    '        "type": "dict",\n'
+    '        "properties": {},\n'
+    '        "required": []\n'
+    "    }\n"
+    "}\n\n"
+    "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+    "hi<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+)
+
+
+def test_build_prompt_byte_exact_snapshot():
+    fn = {"name": "f", "parameters": {"type": "object", "properties": {}, "required": []}}
+    prompt = fmt.build_prompt([fmt.normalize_openai_function(fn)], "hi")
+    assert prompt == EXPECTED_PROMPT

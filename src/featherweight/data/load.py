@@ -63,8 +63,8 @@ def audit() -> None:
     print("irrelevance tools/answers all parse as JSON")
 
     assert non_string_args == 0, (
-        f"{non_string_args} non-string arguments found — keep the isinstance guard "
-        "in schema.extract_calls"
+        f"{non_string_args} non-string arguments found — schema.extract_calls assumes "
+        "JSON-string arguments; re-add dict-argument handling there if this fires"
     )
     print("\nAUDIT OK")
 

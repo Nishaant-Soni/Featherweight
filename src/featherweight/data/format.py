@@ -51,14 +51,17 @@ def normalize_openai_function(fn: dict) -> dict:
 
     Already JSON-schema with `string`/`integer` types; we only set `type` to
     `"dict"` and drop `additionalProperties` to match BFCL's rendering. The main
-    dataset carries no function-level description, so it is "".
+    dataset carries no function-level description, so it is "". `properties` and
+    `required` are always emitted (defaulting to {}/[]) because BFCL functions
+    always render both keys — keeping the prompt byte-consistent for no-arg or
+    all-optional functions too.
     """
     params = fn["parameters"]
-    norm_params: dict = {"type": "dict"}
-    if "properties" in params:
-        norm_params["properties"] = params["properties"]
-    if "required" in params:
-        norm_params["required"] = params["required"]
+    norm_params: dict = {
+        "type": "dict",
+        "properties": params.get("properties", {}),
+        "required": params.get("required", []),
+    }
     return {"name": fn["name"], "description": fn.get("description", ""), "parameters": norm_params}
 
 
