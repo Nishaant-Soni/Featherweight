@@ -14,12 +14,12 @@ __pycache__/
 .env
 
 # Large / generated artifacts (not version controlled)
-data/
-artifacts/
-third_party/
+/data/
+/artifacts/
+/third_party/
 
 # MLflow local store
-mlruns/
+/mlruns/
 
 implementation_plan.md
 docs/
