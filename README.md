@@ -13,7 +13,7 @@ See `PRD.md` for the full product spec.
 Early build. Current state by phase:
 
 - [x] **Phase 0 — Scaffold & pinned requirements**
-- [ ] **Phase 1 — Data prep + chat-template formatting** *(in progress: Group 1 schema ✅, Group 2 load+audit ✅, Group 3 format ✅)*
+- [x] **Phase 1 — Data prep + chat-template formatting** *(schema ✅, load+audit ✅, format ✅, mix+split ✅)*
 - [ ] Phase 2 — First QLoRA run (Colab)
 - [ ] Phase 3 — Base + GPT-4o BFCL baselines
 - [ ] Phase 4 — Fine-tuned eval
