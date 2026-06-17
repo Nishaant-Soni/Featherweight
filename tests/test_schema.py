@@ -19,8 +19,14 @@ PARALLEL_MESSAGES = [
         "role": "assistant",
         "content": None,
         "tool_calls": [
-            {"type": "function", "function": {"name": "live_giveaways_by_type", "arguments": '{"type": "beta"}'}},
-            {"type": "function", "function": {"name": "live_giveaways_by_type", "arguments": '{"type": "game"}'}},
+            {
+                "type": "function",
+                "function": {"name": "live_giveaways_by_type", "arguments": '{"type": "beta"}'},
+            },
+            {
+                "type": "function",
+                "function": {"name": "live_giveaways_by_type", "arguments": '{"type": "game"}'},
+            },
         ],
     },
 ]
@@ -31,7 +37,13 @@ SINGLE_MESSAGES = [
         "role": "assistant",
         "content": None,
         "tool_calls": [
-            {"type": "function", "function": {"name": "web_chain_details", "arguments": '{"chain_slug": "ethereum"}'}},
+            {
+                "type": "function",
+                "function": {
+                    "name": "web_chain_details",
+                    "arguments": '{"chain_slug": "ethereum"}',
+                },
+            },
         ],
     },
 ]
@@ -47,7 +59,9 @@ def test_single_call_roundtrip():
     assert calls == [ToolCall("web_chain_details", {"chain_slug": "ethereum"})]
 
     target = schema.serialize_calls(calls)
-    assert json.loads(target) == [{"name": "web_chain_details", "arguments": {"chain_slug": "ethereum"}}]
+    assert json.loads(target) == [
+        {"name": "web_chain_details", "arguments": {"chain_slug": "ethereum"}}
+    ]
     assert schema.decode_ast(target) == [{"web_chain_details": {"chain_slug": "ethereum"}}]
 
 

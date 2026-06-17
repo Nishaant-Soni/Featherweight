@@ -15,9 +15,9 @@ from pathlib import Path
 # --------------------------------------------------------------------------- #
 # config.py lives at <root>/src/featherweight/config.py -> parents[2] is <root>.
 ROOT_DIR: Path = Path(__file__).resolve().parents[2]
-DATA_DIR: Path = ROOT_DIR / "data"          # git-ignored: cached + formatted data
+DATA_DIR: Path = ROOT_DIR / "data"  # git-ignored: cached + formatted data
 ARTIFACTS_DIR: Path = ROOT_DIR / "artifacts"  # git-ignored: adapters, merged models
-RESULTS_DIR: Path = ROOT_DIR / "results"     # committed: eval tables, plots, logs
+RESULTS_DIR: Path = ROOT_DIR / "results"  # committed: eval tables, plots, logs
 THIRD_PARTY_DIR: Path = ROOT_DIR / "third_party"  # git-ignored: cloned gorilla/BFCL
 
 
@@ -44,8 +44,8 @@ class DataConfig:
     """Data prep + mixing (PRD §4, FR1)."""
 
     irrelevance_ratio: float = 0.12  # ~10-15% of the training mix
-    heldout_size: int = 1000         # fast internal eval split (PRD §4)
-    seed: int = 42                   # deterministic split + shuffling
+    heldout_size: int = 1000  # fast internal eval split (PRD §4)
+    seed: int = 42  # deterministic split + shuffling
 
 
 @dataclass(frozen=True)
