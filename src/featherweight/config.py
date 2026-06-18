@@ -79,6 +79,12 @@ class TrainConfig:
     warmup_ratio: float = 0.03
     weight_decay: float = 0.01
     bf16: bool = True
+    # Eval-loss early stopping (capped by max_steps). Patience-based: stop when
+    # eval_loss hasn't improved by > threshold for `patience` consecutive evals.
+    eval_subset_size: int = 200
+    eval_steps: int = 50
+    early_stopping_patience: int = 3
+    early_stopping_threshold: float = 0.0
     lora: LoraConfig = field(default_factory=LoraConfig)
 
 

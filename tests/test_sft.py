@@ -28,6 +28,23 @@ def test_load_sft_dataset_concatenates_prompt_and_completion(tmp_path):
     assert sft.RESPONSE_MARKER in ds[0]["text"]
 
 
+def test_load_eval_subset_is_mixed(tmp_path):
+    # 8 tool-call rows + 2 irrelevance rows; the eval subset must contain both.
+    p = tmp_path / "heldout.jsonl"
+    rows = [
+        {"prompt": f"p{i}", "completion": '[{"name": "f", "arguments": {}}]<|eot_id|>'}
+        for i in range(8)
+    ]
+    rows += [{"prompt": f"q{i}", "completion": "[]<|eot_id|>"} for i in range(2)]
+    p.write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
+
+    ds = sft.load_eval_subset(p, size=5, seed=1)
+    assert ds.column_names == ["text"]
+    assert len(ds) == 5
+    n_irr = sum(1 for t in ds["text"] if t.endswith("[]<|eot_id|>"))
+    assert 1 <= n_irr < 5  # guaranteed mix: both irrelevance and tool-call rows
+
+
 def test_no_gpu_imports_at_module_level():
     # train/sft must import on the CPU-only Mac; unsloth/trl are imported lazily
     # inside train(). If either were a top-level import, this module's import
