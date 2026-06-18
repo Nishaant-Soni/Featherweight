@@ -61,12 +61,17 @@ def train(
     train_path: Path = DEFAULT_TRAIN_PATH,
     output_dir: Path = DEFAULT_OUTPUT_DIR,
     cfg: config.Config = config.CONFIG,
+    max_steps: int | None = None,
+    limit: int | None = None,
 ) -> Path:
     """Run QLoRA SFT on the T4 and save the LoRA adapter. Colab-only.
 
     Precision is chosen at runtime: bf16 only if the GPU supports it (Ampere+),
     else fp16 — the T4 (Turing, SM 75) does not support bf16, so `cfg.train.bf16`
     is treated as a preference, not a hard setting.
+
+    ``max_steps`` / ``limit`` are for the Group C smoke run (a few steps on a tiny
+    data slice to sanity-check the pipeline); both default to the full run.
     """
     from trl import SFTConfig, SFTTrainer
     from unsloth import FastLanguageModel, is_bfloat16_supported
@@ -91,16 +96,21 @@ def train(
         random_state=cfg.data.seed,
     )
 
+    dataset = load_sft_dataset(train_path)
+    if limit is not None:
+        dataset = dataset.select(range(limit))
+
     trainer = SFTTrainer(
         model=model,
         tokenizer=tokenizer,
-        train_dataset=load_sft_dataset(train_path),
+        train_dataset=dataset,
         args=SFTConfig(
             dataset_text_field="text",
             max_seq_length=cfg.train.max_seq_len,
             per_device_train_batch_size=cfg.train.per_device_batch_size,
             gradient_accumulation_steps=cfg.train.grad_accumulation_steps,
             num_train_epochs=cfg.train.epochs,
+            max_steps=max_steps if max_steps is not None else -1,  # -1 = use epochs
             learning_rate=cfg.train.learning_rate,
             warmup_ratio=cfg.train.warmup_ratio,
             weight_decay=cfg.train.weight_decay,
