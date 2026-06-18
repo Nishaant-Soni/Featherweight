@@ -14,7 +14,7 @@ Early build. Current state by phase:
 
 - [x] **Phase 0 — Scaffold & pinned requirements**
 - [x] **Phase 1 — Data prep + chat-template formatting** *(schema ✅, load+audit ✅, format ✅, mix+split ✅)*
-- [ ] Phase 2 — First QLoRA run (Colab)
+- [ ] **Phase 2 — First QLoRA run (Colab)** *(in progress: Group A held-out scorer ✅)*
 - [ ] Phase 3 — Base + GPT-4o BFCL baselines
 - [ ] Phase 4 — Fine-tuned eval
 - [ ] Phase 5 — Hyperparameter pass
@@ -47,7 +47,7 @@ cp .env.example .env               # then fill HF_TOKEN, OPENAI_API_KEY
 ```
 src/featherweight/   # importable package (config is the single source of truth)
 tests/               # local pytest suite
-notebooks/           # thin Colab driver (Phase 2+)
+notebooks/           # thin Colab driver
 results/             # committed eval tables, plots, latency logs
 ```
 
