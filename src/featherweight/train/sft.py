@@ -73,9 +73,10 @@ def train(
     ``max_steps`` / ``limit`` are for the Group C smoke run (a few steps on a tiny
     data slice to sanity-check the pipeline); both default to the full run.
     """
-    from trl import SFTConfig, SFTTrainer
+    # Import unsloth first (its recommended order; it patches transformers/trl).
     from unsloth import FastLanguageModel, is_bfloat16_supported
     from unsloth.chat_templates import train_on_responses_only
+    from trl import SFTConfig, SFTTrainer
 
     use_bf16 = cfg.train.bf16 and is_bfloat16_supported()
 
@@ -102,11 +103,11 @@ def train(
 
     trainer = SFTTrainer(
         model=model,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,  # TRL 0.24 renamed `tokenizer` -> `processing_class`
         train_dataset=dataset,
         args=SFTConfig(
             dataset_text_field="text",
-            max_seq_length=cfg.train.max_seq_len,
+            max_length=cfg.train.max_seq_len,  # TRL 0.24 name (was max_seq_length)
             per_device_train_batch_size=cfg.train.per_device_batch_size,
             gradient_accumulation_steps=cfg.train.grad_accumulation_steps,
             num_train_epochs=cfg.train.epochs,
