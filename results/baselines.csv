@@ -1,0 +1,2 @@
+model,simple_python,multiple,parallel,parallel_multiple,irrelevance,overall_acc,invalid_rate
+gpt-4o-2024-11-20-FC,90.00,91.50,91.00,78.00,85.00,87.50,0.40

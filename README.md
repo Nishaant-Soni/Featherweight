@@ -15,7 +15,7 @@ Early build. Current state by phase:
 - [x] **Phase 0 — Scaffold & pinned requirements**
 - [x] **Phase 1 — Data prep + chat-template formatting** *(schema ✅, load+audit ✅, format ✅, mix+split ✅)*
 - [x] **Phase 2 — First QLoRA run (Colab)** *(500-step QLoRA adapter on HF Hub; held-out base-vs-FT eval done — exact-match 0.31→0.81, refusal 0.00→0.89, invalid-rate 0.09→0.005)*
-- [ ] **Phase 3 — Base + GPT-4o BFCL baselines** *(Group A: bfcl-eval pinned @2026.3.23 + handler re-verified byte-exact + eval precision pinned ✅; Group B: bfcl_runner + report, unit-tested ✅ — Colab/API run (Group C) pending)*
+- [ ] **Phase 3 — Base + GPT-4o BFCL baselines** *(Group A pin+verify ✅, Group B runner+report ✅, Group C: GPT-4o-FC baseline done — 87.5% non-live AST, $1.67 ✅; base-Llama run on Colab pending)*
 - [ ] Phase 4 — Fine-tuned eval
 - [ ] Phase 5 — Hyperparameter pass
 - [ ] Phase 6 — Merge, quantize, vLLM serving
@@ -41,6 +41,35 @@ python -m venv .venv               # if not already present
 cp .env.example .env               # then fill HF_TOKEN, OPENAI_API_KEY
 .venv/bin/python -m pytest -q      # sanity check
 ```
+
+## Evaluation — BFCL baselines
+
+GPT-4o runs on the Mac (API only); the open-model base runs on Colab (GPU).
+`bfcl-eval` is pinned and installed in an **isolated venv** (its hard version pins
+would clash with the main `.venv`), and writes under a gitignored project root.
+
+```bash
+# isolated env (soundfile = a transitive dep bfcl-eval doesn't pin)
+python3 -m venv .venv-bfcl
+.venv-bfcl/bin/pip install "bfcl-eval==2026.3.23" soundfile
+
+export ROOT="$(pwd)/third_party/bfcl"          # BFCL_PROJECT_ROOT (gitignored); reads/writes here
+KEY=$(grep -E '^OPENAI_API_KEY=' .env | cut -d= -f2-)
+
+# GPT-4o frontier baseline (non-live AST: ~$1.7, ~15 min)
+CATS=simple_python,multiple,parallel,parallel_multiple,irrelevance
+BFCL_PROJECT_ROOT="$ROOT" OPENAI_API_KEY="$KEY" .venv-bfcl/bin/bfcl generate \
+  --model gpt-4o-2024-11-20-FC --test-category "$CATS"
+BFCL_PROJECT_ROOT="$ROOT" OPENAI_API_KEY="$KEY" .venv-bfcl/bin/bfcl evaluate \
+  --model gpt-4o-2024-11-20-FC --test-category "$CATS"
+
+# consolidate into results/baselines.{csv,md} (main .venv)
+.venv/bin/python -c "from pathlib import Path; from featherweight.eval import report; \
+report.write_baselines({'gpt-4o-2024-11-20-FC': report.collect_scores(Path('third_party/bfcl/score/gpt-4o-2024-11-20-FC'))})"
+```
+
+The open-model base baseline (quantized vLLM + `--skip-server-setup`) runs from the
+Colab serve notebook; see `results/baselines.md` for the current table.
 
 ## Layout
 
