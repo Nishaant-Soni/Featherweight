@@ -89,11 +89,29 @@ class TrainConfig:
 
 
 @dataclass(frozen=True)
+class EvalConfig:
+    """BFCL generation settings (PRD FR3, Phase 3/4).
+
+    The 8B base is loaded **quantized** for vLLM generation — an fp16 8B does not
+    fit a 16GB T4, and the base is the heavy part in *both* the base baseline and
+    the FT eval (FT = base + LoRA). The **same** precision is used for both so
+    base-vs-FT stays apples-to-apples (PRD §9 fairness rule). bnb 4-bit matches the
+    precision the adapter was trained on. T4 = Turing (SM 75) -> vLLM, not sglang.
+    """
+
+    base_quantization: str = "bitsandbytes"  # bnb 4-bit; matches the trained base
+    vllm_backend: str = "vllm"  # not sglang (unsupported on Turing/SM 75)
+    vllm_max_model_len: int = 4096  # cap KV cache to fit the T4
+    vllm_gpu_memory_utilization: float = 0.90
+
+
+@dataclass(frozen=True)
 class Config:
     """Top-level config aggregating the sub-configs."""
 
     data: DataConfig = field(default_factory=DataConfig)
     train: TrainConfig = field(default_factory=TrainConfig)
+    eval: EvalConfig = field(default_factory=EvalConfig)
     mlflow_experiment: str = "featherweight"
 
 

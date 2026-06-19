@@ -24,3 +24,10 @@ def test_lora_targets_attention_and_mlp():
     targets = set(config.CONFIG.train.lora.target_modules)
     assert {"q_proj", "k_proj", "v_proj", "o_proj"} <= targets  # attention
     assert {"gate_proj", "up_proj", "down_proj"} <= targets  # MLP
+
+
+def test_eval_base_precision_pinned():
+    # PRD §9 fairness rule: base baseline + FT eval must share one base precision.
+    # Pinned here so Phase 3 (base) and Phase 4 (FT) read the same value.
+    assert config.CONFIG.eval.base_quantization == "bitsandbytes"
+    assert config.CONFIG.eval.vllm_backend == "vllm"  # not sglang on Turing

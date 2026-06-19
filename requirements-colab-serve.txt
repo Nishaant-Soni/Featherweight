@@ -1,5 +1,5 @@
 vllm>=0.6
 autoawq>=0.2
 outlines>=0.0.46
-bfcl-eval
+bfcl-eval==2026.3.23  # pinned: SalesforceLlamaHandler verified byte-for-byte vs build_prompt
 mlflow>=2.15

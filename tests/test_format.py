@@ -6,6 +6,8 @@ are hand-written so the tests are offline and deterministic.
 
 import json
 
+import pytest
+
 from featherweight.data import format as fmt
 from featherweight.data import schema
 
@@ -179,3 +181,28 @@ def test_build_prompt_byte_exact_snapshot():
     fn = {"name": "f", "parameters": {"type": "object", "properties": {}, "required": []}}
     prompt = fmt.build_prompt([fmt.normalize_openai_function(fn)], "hi")
     assert prompt == EXPECTED_PROMPT
+
+
+def test_build_prompt_matches_pinned_handler():
+    """Lock the *handler's* side of the contract against the pinned bfcl-eval.
+
+    Skipped where bfcl-eval isn't installed (the local CPU venv); runs in the
+    Colab serve env. Calls the real ``SalesforceLlamaHandler._format_prompt`` — it
+    uses no instance state, so ``self=None`` is safe — and asserts ``build_prompt``
+    reproduces it byte-for-byte. If this fails after a bfcl-eval bump, the upstream
+    handler changed: re-verify before touching build_prompt / regenerating data.
+    """
+    pytest.importorskip("bfcl_eval")
+    # bfcl-eval is a serve-env-only dep, absent from the local venv -> Pyright can't
+    # resolve it; importorskip guards it at runtime.
+    from bfcl_eval.model_handler.local_inference.salesforce_llama import (  # type: ignore[import-not-found]
+        SalesforceLlamaHandler,
+    )
+
+    fn = {"name": "f", "parameters": {"type": "object", "properties": {}, "required": []}}
+    functions = [fmt.normalize_openai_function(fn)]
+    query = "hi"
+    handler_prompt = SalesforceLlamaHandler._format_prompt(
+        None, [{"role": "user", "content": query}], functions
+    )
+    assert fmt.build_prompt(functions, query) == handler_prompt
