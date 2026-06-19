@@ -14,7 +14,7 @@ Early build. Current state by phase:
 
 - [x] **Phase 0 — Scaffold & pinned requirements**
 - [x] **Phase 1 — Data prep + chat-template formatting** *(schema ✅, load+audit ✅, format ✅, mix+split ✅)*
-- [ ] **Phase 2 — First QLoRA run (Colab)** *(Group A scorer ✅, Group B training module + tracking ✅, Group C notebook authored ✅ — full Colab run pending)*
+- [ ] **Phase 2 — First QLoRA run (Colab)** *(Group A scorer ✅, Group B training module + tracking ✅, Group C notebook authored ✅; first 500-step QLoRA run done — adapter pushed to HF Hub. Held-out eval pending)*
 - [ ] Phase 3 — Base + GPT-4o BFCL baselines
 - [ ] Phase 4 — Fine-tuned eval
 - [ ] Phase 5 — Hyperparameter pass
