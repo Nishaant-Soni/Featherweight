@@ -56,7 +56,7 @@ python3 -m venv .venv-bfcl
 export ROOT="$(pwd)/third_party/bfcl"          # BFCL_PROJECT_ROOT (gitignored); reads/writes here
 KEY=$(grep -E '^OPENAI_API_KEY=' .env | cut -d= -f2-)
 
-# GPT-4o frontier baseline (non-live AST: ~$1.7, ~15 min)
+# GPT-4o frontier baseline (non-live AST: ~15 min)
 CATS=simple_python,multiple,parallel,parallel_multiple,irrelevance
 BFCL_PROJECT_ROOT="$ROOT" OPENAI_API_KEY="$KEY" .venv-bfcl/bin/bfcl generate \
   --model gpt-4o-2024-11-20-FC --test-category "$CATS"
