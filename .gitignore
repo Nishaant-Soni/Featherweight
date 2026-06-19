@@ -3,6 +3,7 @@
 
 # Python env
 .venv/
+.venv-bfcl/
 __pycache__/
 *.pyc
 *.egg-info/
