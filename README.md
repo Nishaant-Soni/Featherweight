@@ -15,7 +15,7 @@ Early build. Current state by phase:
 - [x] **Phase 0 — Scaffold & pinned requirements**
 - [x] **Phase 1 — Data prep + chat-template formatting** *(schema ✅, load+audit ✅, format ✅, mix+split ✅)*
 - [x] **Phase 2 — First QLoRA run (Colab)** *(500-step QLoRA adapter on HF Hub; held-out base-vs-FT eval done — exact-match 0.31→0.81, refusal 0.00→0.89, invalid-rate 0.09→0.005)*
-- [ ] **Phase 3 — Base + GPT-4o BFCL baselines** *(Group A: bfcl-eval pinned @2026.3.23, handler re-verified byte-exact vs build_prompt, eval precision pinned ✅ — runner+report+run pending)*
+- [ ] **Phase 3 — Base + GPT-4o BFCL baselines** *(Group A: bfcl-eval pinned @2026.3.23 + handler re-verified byte-exact + eval precision pinned ✅; Group B: bfcl_runner + report, unit-tested ✅ — Colab/API run (Group C) pending)*
 - [ ] Phase 4 — Fine-tuned eval
 - [ ] Phase 5 — Hyperparameter pass
 - [ ] Phase 6 — Merge, quantize, vLLM serving

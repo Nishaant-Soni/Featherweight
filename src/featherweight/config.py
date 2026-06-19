@@ -103,6 +103,16 @@ class EvalConfig:
     vllm_backend: str = "vllm"  # not sglang (unsupported on Turing/SM 75)
     vllm_max_model_len: int = 4096  # cap KV cache to fit the T4
     vllm_gpu_memory_utilization: float = 0.90
+    # Non-live AST categories we baseline on (Python-relevant + irrelevance). BFCL's
+    # `simple` splits by language; our model emits Python-style JSON calls, so we
+    # take simple_python (not java/javascript). Same set for base and FT (PRD FR3).
+    categories: tuple[str, ...] = (
+        "simple_python",
+        "multiple",
+        "parallel",
+        "parallel_multiple",
+        "irrelevance",
+    )
 
 
 @dataclass(frozen=True)
