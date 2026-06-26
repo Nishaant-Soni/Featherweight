@@ -24,7 +24,7 @@ Early build. Current state by phase:
 
 ## Execution model
 
-Work runs in two environments (forced by hardware — this Mac has no NVIDIA GPU):
+Work runs in two environments:
 
 - **Local `.venv`** (Python 3.12, arm64) — data prep, BFCL orchestration, GPT-4o
   baseline calls, results analysis, tests. Deps in `requirements.txt`.
