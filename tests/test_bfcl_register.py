@@ -23,3 +23,17 @@ def test_base_registration_uses_prompting_path():
     assert cfg.model_handler.__name__ == "SalesforceLlamaHandler"
     # request `model` + tokenizer resolve to the real base our vLLM serves
     assert cfg.model_name == "unsloth/llama-3.1-8b-Instruct-bnb-4bit"
+
+
+def test_ft_registration_routes_to_lora_adapter():
+    pytest.importorskip("bfcl_eval")
+    import bfcl_eval.constants.model_config as mc  # type: ignore[import-not-found]
+
+    name = bfcl_register.register_ft_model()
+    cfg = mc.MODEL_CONFIG_MAPPING[name]
+    assert cfg.is_fc_model is False  # same prompting path as the base (fair delta)
+    assert "FC" not in name
+    assert cfg.model_handler.__name__ == "SalesforceLlamaHandler"
+    # model_name must equal the registry name so the request `model` field routes to
+    # the vLLM --lora-modules adapter, not the base (see docs/iteration_13.md).
+    assert cfg.model_name == name == "featherweight-ft"

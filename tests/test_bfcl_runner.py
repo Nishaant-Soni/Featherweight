@@ -43,3 +43,17 @@ def test_vllm_serve_cmd_uses_config_precision_and_fp16():
     assert cmd[cmd.index("--max-model-len") + 1] == str(config.CONFIG.eval.vllm_max_model_len)
     assert cmd[cmd.index("--dtype") + 1] == "half"  # T4 (Turing) has no bf16
     assert cmd[cmd.index("--port") + 1] == "8000"
+    assert "--enable-lora" not in cmd  # base baseline serves no adapter
+
+
+def test_vllm_serve_cmd_with_lora_adapter():
+    cmd = r.vllm_serve_cmd(
+        "unsloth/llama-3.1-8b-Instruct-bnb-4bit",
+        8000,
+        lora_modules={"featherweight-ft": "/content/adapter"},
+    )
+    assert "--enable-lora" in cmd
+    # the module name == the FT registry model_name, so requests route to the adapter.
+    assert cmd[cmd.index("--lora-modules") + 1] == "featherweight-ft=/content/adapter"
+    # rank defaults to the trained LoRA r (single source of truth in config).
+    assert cmd[cmd.index("--max-lora-rank") + 1] == str(config.CONFIG.train.lora.r)

@@ -84,14 +84,21 @@ def vllm_serve_cmd(
     max_model_len: int = config.CONFIG.eval.vllm_max_model_len,
     gpu_memory_utilization: float = config.CONFIG.eval.vllm_gpu_memory_utilization,
     dtype: str = "half",
+    lora_modules: dict[str, str] | None = None,
+    max_lora_rank: int = config.CONFIG.train.lora.r,
 ) -> list[str]:
     """`vllm serve` argv for the externally-launched quantized server (T4 path).
 
     bfcl's built-in launch can't pass these, so we run this ourselves and connect
     bfcl with `--skip-server-setup`. ``dtype=half`` (fp16) because the T4 (Turing,
     SM 75) has no bf16.
+
+    For the Phase 4 FT eval, pass ``lora_modules={name: adapter_dir}`` to serve the
+    base + a LoRA adapter (``--enable-lora``); ``name`` must match the FT registry
+    ``model_name`` so requests route to the adapter. ``max_lora_rank`` defaults to the
+    trained LoRA rank.
     """
-    return [
+    cmd = [
         "vllm",
         "serve",
         model_id,
@@ -107,3 +114,12 @@ def vllm_serve_cmd(
         str(gpu_memory_utilization),
         "--trust-remote-code",
     ]
+    if lora_modules:
+        cmd += [
+            "--enable-lora",
+            "--lora-modules",
+            *[f"{name}={path}" for name, path in lora_modules.items()],
+            "--max-lora-rank",
+            str(max_lora_rank),
+        ]
+    return cmd
