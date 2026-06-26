@@ -15,7 +15,7 @@ Early build. Current state by phase:
 - [x] **Phase 0 — Scaffold & pinned requirements**
 - [x] **Phase 1 — Data prep + chat-template formatting** *(schema ✅, load+audit ✅, format ✅, mix+split ✅)*
 - [x] **Phase 2 — First QLoRA run (Colab)** *(500-step QLoRA adapter on HF Hub; held-out base-vs-FT eval done — exact-match 0.31→0.81, refusal 0.00→0.89, invalid-rate 0.09→0.005)*
-- [ ] **Phase 3 — Base + GPT-4o BFCL baselines** *(Group A pin+verify ✅, Group B runner+report ✅, Group C: GPT-4o-FC done (87.5%, $1.67) ✅, base-Llama runbook authored (`colab_bfcl_base.ipynb`) ✅ — Colab run pending)*
+- [x] **Phase 3 — Base + GPT-4o BFCL baselines** *(GPT-4o-FC 87.50% overall / 0.40% invalid; base Llama-3.1-8B 43.15% / 9.35% invalid — both in `results/baselines.{csv,md}`)*
 - [ ] Phase 4 — Fine-tuned eval
 - [ ] Phase 5 — Hyperparameter pass
 - [ ] Phase 6 — Merge, quantize, vLLM serving

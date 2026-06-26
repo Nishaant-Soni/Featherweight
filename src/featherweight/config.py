@@ -101,7 +101,7 @@ class EvalConfig:
 
     base_quantization: str = "bitsandbytes"  # bnb 4-bit; matches the trained base
     vllm_backend: str = "vllm"  # not sglang (unsupported on Turing/SM 75)
-    vllm_max_model_len: int = 4096  # cap KV cache to fit the T4
+    vllm_max_model_len: int = 8192  # must exceed input + bfcl's 4096-token completion cap; fits T4
     vllm_gpu_memory_utilization: float = 0.90
     # Non-live AST categories we baseline on (Python-relevant + irrelevance). BFCL's
     # `simple` splits by language; our model emits Python-style JSON calls, so we
