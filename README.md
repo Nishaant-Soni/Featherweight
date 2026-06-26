@@ -44,7 +44,7 @@ cp .env.example .env               # then fill HF_TOKEN, OPENAI_API_KEY
 
 ## Evaluation — BFCL baselines
 
-GPT-4o runs on the Mac (API only); the open-model base runs on Colab (GPU).
+GPT-4o runs on the local machine (API only); the open-model base runs on Colab (GPU).
 `bfcl-eval` is pinned and installed in an **isolated venv** (its hard version pins
 would clash with the main `.venv`), and writes under a gitignored project root.
 
