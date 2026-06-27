@@ -24,26 +24,29 @@ def _write_jsonl(path: Path, examples: list[dict]) -> None:
             f.write(json.dumps(ex, ensure_ascii=False) + "\n")
 
 
-def main() -> None:
+def main(irrelevance_ratio: float | None = None, out_dir: Path = config.DATA_DIR) -> None:
     xlam = [fmt.format_xlam_row(r) for r in cast(Iterable[dict], load.load_xlam())]
     irr = [fmt.format_irrelevance_row(r) for r in cast(Iterable[dict], load.load_irrelevance())]
 
     dc = config.CONFIG.data
+    # Phase 5 sweep regenerates data per irrelevance_ratio; default = the locked config.
+    ratio = irrelevance_ratio if irrelevance_ratio is not None else dc.irrelevance_ratio
     train, heldout = mix.mix_and_split(
-        xlam, irr, ratio=dc.irrelevance_ratio, heldout_size=dc.heldout_size, seed=dc.seed
+        xlam, irr, ratio=ratio, heldout_size=dc.heldout_size, seed=dc.seed
     )
 
-    config.DATA_DIR.mkdir(parents=True, exist_ok=True)
-    _write_jsonl(config.DATA_DIR / "train.jsonl", train)
-    _write_jsonl(config.DATA_DIR / "heldout.jsonl", heldout)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    _write_jsonl(out_dir / "train.jsonl", train)
+    _write_jsonl(out_dir / "heldout.jsonl", heldout)
 
     total = len(train) + len(heldout)
     n_irr = sum(1 for e in train + heldout if e["completion"] == "[]<|eot_id|>")
     print(f"xlam formatted:     {len(xlam)}")
     print(f"irrelevance formatted: {len(irr)}")
+    print(f"irrelevance ratio: {ratio}")
     print(f"train: {len(train)}   heldout: {len(heldout)}   total: {total}")
     print(f"irrelevance in mix: {n_irr} ({n_irr / total:.1%})")
-    print(f"wrote {config.DATA_DIR / 'train.jsonl'} and {config.DATA_DIR / 'heldout.jsonl'}")
+    print(f"wrote {out_dir / 'train.jsonl'} and {out_dir / 'heldout.jsonl'}")
 
 
 if __name__ == "__main__":

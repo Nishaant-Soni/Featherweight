@@ -87,6 +87,7 @@ def train(
     max_steps: int | None = None,
     limit: int | None = None,
     early_stopping: bool = True,
+    run_name: str = "qlora-sft",
 ) -> Path:
     """Run QLoRA SFT on the T4 and save the LoRA adapter. Colab-only.
 
@@ -187,7 +188,7 @@ def train(
         response_part=RESPONSE_MARKER,
     )
 
-    with tracking.mlflow_run(run_name="qlora-sft", params=_log_params(cfg)):
+    with tracking.mlflow_run(run_name=run_name, params=_log_params(cfg)):
         trainer.train()
         model.save_pretrained(str(output_dir))
         tokenizer.save_pretrained(str(output_dir))

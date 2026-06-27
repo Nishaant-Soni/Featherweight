@@ -23,6 +23,27 @@ def test_effective_resolves_none_to_config_defaults():
     assert sweep.SweepRun("x", irrelevance_ratio=0.20).effective()["irrelevance_ratio"] == 0.20
 
 
+def test_config_for_applies_overrides():
+    run = sweep.SweepRun("x", irrelevance_ratio=0.20, epochs=3, rank=32, learning_rate=1e-4)
+    cfg = sweep.config_for(run)
+    assert cfg.data.irrelevance_ratio == 0.20
+    assert cfg.train.epochs == 3
+    assert cfg.train.lora.r == 32
+    assert cfg.train.learning_rate == 1e-4
+    # alpha is intentionally left at the default (rank-scaling is a Group C decision).
+    assert cfg.train.lora.alpha == config.CONFIG.train.lora.alpha
+
+
+def test_config_for_baseline_matches_config_without_mutating_global():
+    before = config.CONFIG.train.epochs
+    cfg = sweep.config_for(sweep.SweepRun("r0-baseline"))
+    assert cfg.data.irrelevance_ratio == config.CONFIG.data.irrelevance_ratio
+    assert cfg.train.epochs == config.CONFIG.train.epochs
+    assert cfg.train.lora.r == config.CONFIG.train.lora.r
+    # the frozen global config must be left untouched by replace().
+    assert config.CONFIG.train.epochs == before
+
+
 def test_select_best_picks_highest_exact_match_above_floor():
     metrics = {
         "r0-baseline": _m(exact=0.80, refusal=0.89),

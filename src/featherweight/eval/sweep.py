@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import csv
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from featherweight import config
@@ -56,6 +56,28 @@ SWEEP_RUNS: tuple[SweepRun, ...] = (
     SweepRun("r1-irr0.20", irrelevance_ratio=0.20),
     SweepRun("r2-irr0.25", irrelevance_ratio=0.25),
 )
+
+
+def config_for(run: SweepRun) -> config.Config:
+    """Build a per-run `Config` with the sweep overrides applied, via
+    `dataclasses.replace` (the global `config.CONFIG` is frozen and left untouched).
+
+    Sets the LoRA **rank** only; `lora_alpha` is left at the config default — for the
+    optional rank-32 follow-up, whether to scale alpha with rank is a Group C decision
+    (see implementation_plan.md / docs).
+    """
+    eff = run.effective()
+    base = config.CONFIG
+    return replace(
+        base,
+        data=replace(base.data, irrelevance_ratio=eff["irrelevance_ratio"]),
+        train=replace(
+            base.train,
+            epochs=eff["epochs"],
+            learning_rate=eff["learning_rate"],
+            lora=replace(base.train.lora, r=eff["rank"]),
+        ),
+    )
 
 
 def select_best(metrics_by_run: dict[str, dict], refusal_floor: float) -> str | None:
