@@ -17,7 +17,7 @@ Early build. Current state by phase:
 - [x] **Phase 2 — First QLoRA run (Colab)** *(500-step QLoRA adapter on HF Hub; held-out base-vs-FT eval done — exact-match 0.31→0.81, refusal 0.00→0.89, invalid-rate 0.09→0.005)*
 - [x] **Phase 3 — Base + GPT-4o BFCL baselines** *(GPT-4o-FC 87.50% overall / 0.40% invalid; base Llama-3.1-8B 43.15% / 9.35% invalid — both in `results/baselines.{csv,md}`)*
 - [x] **Phase 4 — Fine-tuned eval** *(FT via vLLM `--enable-lora` on BFCL: **89.44% overall / 0.40% invalid** — edges out GPT-4o (87.50%), up from base 43.15% / 9.35%; one regression, irrelevance 90.42→76.25 (over-calling). Three-way table in `results/baselines.{csv,md}`)*
-- [ ] **Phase 5 — Hyperparameter pass** *(lean sweep targeting the irrelevance regression; Group A: `eval/sweep.py` run spec + selector + `sweep.{csv,md}` writer ✅; Group B: `config_for` + `prep_data`/`sft` override plumbing + tests ✅; Group C Colab sweep pending)*
+- [ ] **Phase 5 — Hyperparameter pass** *(lean sweep targeting the irrelevance regression; Group A selector+writer ✅, Group B override plumbing+tests ✅, Group C sweep driver authored (`colab_sweep.ipynb`) ✅ — Colab sweep runs pending)*
 - [ ] Phase 6 — Merge, quantize, vLLM serving
 - [ ] Phase 7 — Constrained decoding
 - [ ] Phase 8 — Write-up & deliverables
