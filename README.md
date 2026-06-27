@@ -16,7 +16,7 @@ Early build. Current state by phase:
 - [x] **Phase 1 — Data prep + chat-template formatting** *(schema ✅, load+audit ✅, format ✅, mix+split ✅)*
 - [x] **Phase 2 — First QLoRA run (Colab)** *(500-step QLoRA adapter on HF Hub; held-out base-vs-FT eval done — exact-match 0.31→0.81, refusal 0.00→0.89, invalid-rate 0.09→0.005)*
 - [x] **Phase 3 — Base + GPT-4o BFCL baselines** *(GPT-4o-FC 87.50% overall / 0.40% invalid; base Llama-3.1-8B 43.15% / 9.35% invalid — both in `results/baselines.{csv,md}`)*
-- [ ] **Phase 4 — Fine-tuned eval** *(Group A contract locked ✅; Group B `register_ft_model` + LoRA `vllm_serve_cmd` + tests ✅; Group C runbook authored (`colab_bfcl_ft.ipynb`) ✅ — Colab FT run pending)*
+- [x] **Phase 4 — Fine-tuned eval** *(FT via vLLM `--enable-lora` on BFCL: **89.44% overall / 0.40% invalid** — edges out GPT-4o (87.50%), up from base 43.15% / 9.35%; one regression, irrelevance 90.42→76.25 (over-calling). Three-way table in `results/baselines.{csv,md}`)*
 - [ ] Phase 5 — Hyperparameter pass
 - [ ] Phase 6 — Merge, quantize, vLLM serving
 - [ ] Phase 7 — Constrained decoding
