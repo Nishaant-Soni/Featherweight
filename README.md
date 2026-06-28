@@ -17,10 +17,19 @@ Early build. Current state by phase:
 - [x] **Phase 2 — First QLoRA run (Colab)** *(500-step QLoRA adapter on HF Hub; held-out base-vs-FT eval done — exact-match 0.31→0.81, refusal 0.00→0.89, invalid-rate 0.09→0.005)*
 - [x] **Phase 3 — Base + GPT-4o BFCL baselines** *(GPT-4o-FC 87.50% overall / 0.40% invalid; base Llama-3.1-8B 43.15% / 9.35% invalid — both in `results/baselines.{csv,md}`)*
 - [x] **Phase 4 — Fine-tuned eval** *(FT via vLLM `--enable-lora` on BFCL: **89.44% overall / 0.40% invalid** — edges out GPT-4o (87.50%), up from base 43.15% / 9.35%; one regression, irrelevance 90.42→76.25 (over-calling). Three-way table in `results/baselines.{csv,md}`)*
-- [ ] **Phase 5 — Hyperparameter pass** *(lean sweep targeting the irrelevance regression; Group A selector+writer ✅, Group B override plumbing+tests ✅, Group C sweep driver authored (`colab_sweep.ipynb`) ✅ — Colab sweep runs pending)*
+- [x] **Phase 5 — Hyperparameter pass** *(investigated → **R0 retained**. Lean sweep harness built (`eval/sweep.py`, `colab_sweep.ipynb`); R1 (ratio 0.20) was held-out-indistinguishable from R0, and the regression is out-of-distribution — the in-distribution ratio lever is the wrong fix, so the sweep was stopped. See `results/sweep.{csv,md}` + the limitation below.)*
 - [ ] Phase 6 — Merge, quantize, vLLM serving
 - [ ] Phase 7 — Constrained decoding
 - [ ] Phase 8 — Write-up & deliverables
+
+### Known limitation — BFCL irrelevance over-calling
+
+The fine-tune trades some "don't-call" caution for tool-calling skill: BFCL irrelevance
+drops **90.42 (base) → 76.25 (FT)** while the four tool-calling categories rise to ≥90 and
+overall still beats GPT-4o (89.44 vs 87.50). The effect is specific and understood —
+*in-distribution* refusal is unharmed (held-out 0.89); only *out-of-distribution* irrelevance
+regresses. Phase 5 confirmed the irrelevance-mix-ratio lever doesn't address an OOD gap
+(R1 was held-out-indistinguishable), so it's accepted as a measured trade-off.
 
 ## Execution model
 
