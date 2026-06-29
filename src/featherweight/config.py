@@ -116,12 +116,30 @@ class EvalConfig:
 
 
 @dataclass(frozen=True)
+class ServeConfig:
+    """Phase 6 serving artifact (FR4): merge the adapter to fp16, then 4-bit quantize.
+
+    AWQ is the primary method (fast fused kernels). On the T4 (Turing) the build-time
+    fallback chain is AWQ -> GPTQ -> bnb-4bit+LoRA, decided at Colab time (not encoded
+    here). The two subdirs separate the fp16 merge (which a GPTQ fallback would reuse)
+    from the quantized artifact.
+    """
+
+    quantization: str = "awq"
+    awq_bits: int = 4
+    awq_group_size: int = 128
+    merged_16bit_subdir: str = "merged_16bit"
+    quantized_subdir: str = "quantized_awq"
+
+
+@dataclass(frozen=True)
 class Config:
     """Top-level config aggregating the sub-configs."""
 
     data: DataConfig = field(default_factory=DataConfig)
     train: TrainConfig = field(default_factory=TrainConfig)
     eval: EvalConfig = field(default_factory=EvalConfig)
+    serve: ServeConfig = field(default_factory=ServeConfig)
     mlflow_experiment: str = "featherweight"
 
 
