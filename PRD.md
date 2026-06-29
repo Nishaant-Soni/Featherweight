@@ -62,10 +62,10 @@ Headline metric is **BFCL accuracy** on the non-live AST categories (simple, mul
 | Base model | **LOCKED: `Llama-3.1-8B-Instruct`** (Unsloth 4-bit: `unsloth/llama-3.1-8b-Instruct-bnb-4bit`) | Fits a free T4 (~10GB peak). Train from the Instruct variant + its native chat template. |
 | Training | **Unsloth** + QLoRA (4-bit NF4) | ~2× faster, ~70% less VRAM; <~10GB peak; ~45 min on a T4. |
 | Frameworks | `transformers`, `trl` (SFTTrainer), `peft`, `bitsandbytes` | Unsloth wraps these. |
-| Runtime | Google Colab (free T4) | Python 3.10/3.11 — **not 3.12** (Unsloth compat). Mount Drive for checkpoints. |
+| Runtime | Google Colab (free T4) | Python 3.10/3.11 — **not 3.12** (Unsloth compat). Persist checkpoints to **HF Hub** (Drive mount is unreliable under the VS Code Colab extension). |
 | Eval | BFCL harness (gorilla repo) + custom held-out AST scorer | Programmatic, no LLM-judge needed for the headline number. |
-| Serving | **vLLM** (offline `LLM` class in Colab) | Export merged model; report throughput + p95 latency. |
-| Quantization (serving) | AWQ or GPTQ 4-bit | For the cost/latency story. |
+| Serving | **vLLM** (offline `LLM` class in Colab) | Serve the 4-bit base + LoRA (merged-model export needs ≥24GB; not the free T4); report throughput + p95 latency. |
+| Quantization (serving) | 4-bit — **bnb** on the free T4 (AWQ/GPTQ OOM the ~16GB fp16 calibration load; viable on ≥24GB) | For the cost/latency story. |
 | Constrained decoding | Outlines / vLLM guided decoding | Guarantees valid JSON tool calls. |
 | Tracking | Weights & Biases or MLflow | You already list MLflow — use it. |
 
@@ -78,7 +78,7 @@ xLAM (+irrelevance) ──► format to chat template (query + tools → tool_ca
                     Unsloth QLoRA SFT (T4)  ──►  LoRA adapter
                               │
                               ▼
-              merge + 4-bit quantize (AWQ/GPTQ)
+         4-bit serve: bnb base + LoRA (T4; merge+AWQ needs ≥24GB)
                               │
             ┌─────────────────┴─────────────────┐
             ▼                                     ▼
@@ -93,7 +93,7 @@ xLAM (+irrelevance) ──► format to chat template (query + tools → tool_ca
 1. **Data prep** — load dataset, serialize each example into the base model's chat template: system + user query + tool schemas → assistant message containing the gold tool-call JSON. Mix in irrelevance examples.
 2. **Training** — QLoRA (r=16–32, alpha=32, LoRA on attention + MLP proj), 2–4 epochs, max_len ~2048, bf16, gradient accumulation. Log loss + a held-out AST accuracy callback.
 3. **Eval** — run base, fine-tuned, and GPT-4o through the BFCL harness; produce a category-broken-down table (simple / multiple / parallel / relevance) plus invalid-JSON rate. Also run the held-out scorer.
-4. **Serving** — merge adapter, quantize, load in vLLM, batch-infer the eval set, record throughput and p95 latency; compute $/1K calls vs GPT-4o pricing.
+4. **Serving** — load a 4-bit model in vLLM (on the free T4: the bnb-4bit base + LoRA, since AWQ/GPTQ merge-quantize OOMs the 16GB fp16 calibration load — viable on ≥24GB), batch-infer the eval set, record throughput and p95 latency; compute $/1K calls vs GPT-4o pricing.
 5. **Constrained decoding** — add guided JSON decoding; re-measure invalid-output rate (target ~0%).
 
 ## 8. Milestones (2 weekends)
@@ -106,7 +106,7 @@ xLAM (+irrelevance) ──► format to chat template (query + tools → tool_ca
 
 **Weekend 2**
 - Hyperparameter pass (epochs, rank, learning rate, data mix ratio).
-- Merge + quantize; vLLM serving + latency/throughput benchmark.
+- 4-bit serving (bnb base + LoRA on the T4; merge+AWQ needs ≥24GB) via vLLM + latency/throughput benchmark.
 - Add constrained decoding; re-eval.
 - Write README, model card, results table, and resume bullets.
 
@@ -120,7 +120,7 @@ xLAM (+irrelevance) ──► format to chat template (query + tools → tool_ca
 | Overfitting to xLAM style | Monitor held-out AST accuracy; mix datasets; keep epochs modest (2–4). |
 | T4 OOM on 8B | Use Unsloth 4-bit, max_len ≤ 2048, smaller batch + grad accumulation; fall back to Phi-3.5-mini if needed. |
 | vLLM awkward inside a notebook | Use the offline `LLM` batch API, not the HTTP server. |
-| Colab session timeout | Checkpoint to Google Drive; resume from adapter. |
+| Colab session timeout | Push the LoRA adapter to HF Hub (Drive mount unreliable under the VS Code Colab extension); resume from the Hub repo. |
 | Data licensing | Locked dataset is CC-BY-4.0 and ungated — no restriction; just attribute xLAM/APIGen in the README. |
 
 ## 10. Deliverables
@@ -132,6 +132,6 @@ xLAM (+irrelevance) ──► format to chat template (query + tools → tool_ca
 
 ## 11. Draft Resume Bullets (fill in measured numbers)
 
-- Fine-tuned Llama-3.1-8B (QLoRA, Unsloth) into a function-calling specialist on 60K verified tool-use examples, raising Berkeley Function-Calling Leaderboard AST accuracy from XX% (base) to YY% — approaching GPT-4o (ZZ%) at roughly 1/N the inference cost.
-- Evaluated base, fine-tuned, and GPT-4o models on the public BFCL V4 harness (2K+ gold cases), reporting category-level accuracy, relevance/refusal rate, and per-call token cost to quantify the cost/accuracy tradeoff of specialization.
-- Served the merged model with vLLM and 4-bit AWQ quantization on a single GPU at ~X req/s and ~Nms p95; added grammar-constrained decoding to guarantee valid tool-call JSON, driving malformed-output errors to ~0%.
+- Fine-tuned Llama-3.1-8B (QLoRA, Unsloth) into a function-calling specialist on 60K verified tool-use examples, raising Berkeley Function-Calling Leaderboard AST accuracy from XX% (base) to YY% — matching, and slightly edging out, GPT-4o (ZZ%) at roughly 1/N the inference cost.
+- Evaluated base, fine-tuned, and GPT-4o models on the public BFCL V4 harness (non-live AST categories, ~1.2K gold cases), reporting category-level accuracy, relevance/refusal rate, and per-call token cost to quantify the cost/accuracy tradeoff of specialization.
+- Served the 4-bit quantized model (bitsandbytes) + LoRA with vLLM on a single T4 at ~X req/s and ~Nms p95; added grammar-constrained decoding to guarantee valid tool-call JSON, driving malformed-output errors to ~0%.

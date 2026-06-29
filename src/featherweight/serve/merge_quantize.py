@@ -59,8 +59,9 @@ def merge_quantize(
         model_name=adapter_id,
         max_seq_length=cfg.train.max_seq_len,
         dtype=None,
-        load_in_4bit=False,  # 16-bit load for a clean merge
+        load_in_4bit=True,  # fits the 16 GB T4; merged_16bit dequant-merges to fp16 on save
     )
+    # Unsloth's standard QLoRA merge: dequantize the 4-bit base + fold in the LoRA, write fp16.
     model.save_pretrained_merged(str(merged_dir), tokenizer, save_method="merged_16bit")
 
     # 2) Quantize the fp16 merge to 4-bit AWQ.

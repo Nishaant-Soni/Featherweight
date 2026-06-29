@@ -18,7 +18,7 @@ Early build. Current state by phase:
 - [x] **Phase 3 — Base + GPT-4o BFCL baselines** *(GPT-4o-FC 87.50% overall / 0.40% invalid; base Llama-3.1-8B 43.15% / 9.35% invalid — both in `results/baselines.{csv,md}`)*
 - [x] **Phase 4 — Fine-tuned eval** *(FT via vLLM `--enable-lora` on BFCL: **89.44% overall / 0.40% invalid** — edges out GPT-4o (87.50%), up from base 43.15% / 9.35%; one regression, irrelevance 90.42→76.25 (over-calling). Three-way table in `results/baselines.{csv,md}`)*
 - [x] **Phase 5 — Hyperparameter pass** *(investigated → **R0 retained**. Lean sweep harness built (`eval/sweep.py`, `colab_sweep.ipynb`); R1 (ratio 0.20) was held-out-indistinguishable from R0, and the regression is out-of-distribution — the in-distribution ratio lever is the wrong fix, so the sweep was stopped. See `results/sweep.{csv,md}` + the limitation below.)*
-- [ ] **Phase 6 — Merge, quantize, vLLM serving** *(Group A: `utils/cost.py` math + `serving.{csv,md}` writer ✅; Group B: `ServeConfig` + `serve/merge_quantize.py` (merge→fp16→AWQ, lazy GPU imports) + tests ✅; Group C — Colab serve/measure — pending)*
+- [ ] **Phase 6 — Merge, quantize, vLLM serving** *(Group A cost/latency math ✅, Group B `merge_quantize`/`ServeConfig` ✅, Group C serve/measure notebook ✅. AWQ/GPTQ quantize OOMs the free-T4 (16 GB fp16 won't fit) → serving the validated **bnb-4bit base + R0 LoRA** instead; `colab_serve_eval.ipynb` single-session — Colab run pending → `results/serving.md`)*
 - [ ] Phase 7 — Constrained decoding
 - [ ] Phase 8 — Write-up & deliverables
 

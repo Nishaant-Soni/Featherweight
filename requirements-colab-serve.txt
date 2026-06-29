@@ -3,3 +3,5 @@ autoawq>=0.2
 outlines>=0.0.46
 bfcl-eval==2026.3.23  # pinned: SalesforceLlamaHandler verified byte-for-byte vs build_prompt
 mlflow>=2.15
+bitsandbytes>=0.46.1  # vLLM bnb-4bit serving (the Phase 6 serving artifact on the T4)
+transformers<5  # transformers 5.x breaks vLLM's tokenizer wrapper (found in Phase 3/4)
